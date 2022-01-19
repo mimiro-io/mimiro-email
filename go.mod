@@ -1,4 +1,4 @@
-module mimiro-email
+module github.com/mimiro-io/mimiro-email
 
 go 1.17
 
