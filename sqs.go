@@ -7,38 +7,81 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
+	"github.com/rotisserie/eris"
+	"github.com/spf13/cast"
 	"go.uber.org/zap"
 	"strings"
 )
 
 type MailSQSService struct {
 	logger *zap.SugaredLogger
-	cfg    EmailConfig
+	cfg    Config
 	client *sqs.Client
 }
 
-func NewMailSQSService(cfg EmailConfig) *MailSQSService {
+type Config struct {
+	QueueName    string
+	SenderEmail  string
+	DelaySeconds int32
+	Region       string
+	Url          string
+	ClientId     string
+	Secret       string
+}
+
+func NewMailSQSService(cfg Properties) *MailSQSService {
 	logger := zap.NewNop().Sugar()
+	config, err := cfg.ValidAWSConfig()
+	if err != nil {
+		logger.Warnf(err.Error())
+		return nil
+	}
 	return &MailSQSService{
 		logger: logger.Named("email"),
-		cfg:    cfg,
+		cfg:    config,
 		client: sqs.NewFromConfig(aws.Config{
-			Region:      cfg.Aws.Region,
-			Credentials: credentials.NewStaticCredentialsProvider(cfg.Aws.ClientId, cfg.Aws.Secret, ""),
+			Region:      config.Region,
+			Credentials: credentials.NewStaticCredentialsProvider(config.ClientId, config.Secret, ""),
 			EndpointResolverWithOptions: aws.EndpointResolverWithOptionsFunc(func(service string, region string, Options ...interface{}) (aws.Endpoint, error) {
 				return aws.Endpoint{
-					URL:           cfg.Aws.Url,
-					SigningRegion: cfg.Aws.Region,
+					URL:           config.Url,
+					SigningRegion: config.Region,
 				}, nil
 			}),
 		}),
 	}
 }
 
+func (p Properties) ValidAWSConfig() (Config, error) {
+	required := []string{"QueueName", "Sender", "DelaySeconds", "Region", "Url", "ClientId", "Secret"}
+	var valid = true
+	errorMsg := "Missing required properties :"
+	for i, _ := range required {
+		if p[required[i]] == nil {
+			valid = false
+			errorMsg = errorMsg + fmt.Sprintf(" %s", required[i])
+		}
+	}
+
+	if valid {
+		return Config{
+			QueueName:    p[required[0]].(string),
+			SenderEmail:  p[required[1]].(string),
+			DelaySeconds: cast.ToInt32(p[required[2]]),
+			Region:       p[required[3]].(string),
+			Url:          p[required[4]].(string),
+			ClientId:     p[required[5]].(string),
+			Secret:       p[required[6]].(string),
+		}, nil
+	} else {
+		return Config{}, eris.New(errorMsg)
+	}
+}
+
 func (s *MailSQSService) SendTemplate(email Mail) error {
 	// Get URL of queue
 	gQInput := &sqs.GetQueueUrlInput{
-		QueueName: &s.cfg.Aws.QueueName,
+		QueueName: &s.cfg.QueueName,
 	}
 	queueUrl, err := s.client.GetQueueUrl(context.Background(), gQInput)
 	if err != nil {
@@ -46,7 +89,7 @@ func (s *MailSQSService) SendTemplate(email Mail) error {
 	}
 
 	input := &sqs.SendMessageInput{
-		DelaySeconds: s.cfg.Aws.DelaySeconds,
+		DelaySeconds: s.cfg.DelaySeconds,
 		MessageAttributes: map[string]types.MessageAttributeValue{
 			"SENDER_EMAIL": {
 				DataType:    aws.String("String"),

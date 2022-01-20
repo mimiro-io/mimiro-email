@@ -8,6 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.16.0
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/rotisserie/eris v0.5.1
+	github.com/spf13/cast v1.4.1
 	go.uber.org/zap v1.20.0
 )
 
