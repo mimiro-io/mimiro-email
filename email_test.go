@@ -41,6 +41,45 @@ func TestNewEmail(t *testing.T) {
 			g.Assert(err).IsNotNil()
 		})
 
+		g.It("test configuration  is ok ", func() {
+			consoleCfg := EmailConfig{
+				Service: "AWS",
+				Properties: map[string]interface{}{
+					"QueueName":    "email",                                  // number => string
+					"Sender":       "OpenFarm Dev <noreply@openfarm-dev.io>", // string => number
+					"DelaySeconds": 10,
+					"Region":       "east-1",
+					"Url":          "https://domain.com/whatever",
+					"ClientId":     "ClientId",
+					"Secret":       "Secret",
+				},
+			}
+
+			config, err := consoleCfg.Properties.ValidAWSConfig()
+
+			g.Assert(err).IsNil()
+			g.Assert(config).IsNotNil()
+		})
+
+		g.It("test configuration  is not ok ", func() {
+			consoleCfg := EmailConfig{
+				Service: "AWS",
+				Properties: map[string]interface{}{
+					"QueueName":    "email",                                  // number => string
+					"Senderz":      "OpenFarm Dev <noreply@openfarm-dev.io>", // string => number
+					"DelaySeconds": 10,
+					"Url":          "https://domain.com/whatever",
+					"ClientId":     "ClientId",
+					"Secret":       "Secret",
+				},
+			}
+
+			config, err := consoleCfg.Properties.ValidAWSConfig()
+
+			g.Assert(err).IsNotNil()
+			g.Assert(config).IsZero()
+		})
+
 	})
 
 }
