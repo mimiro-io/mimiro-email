@@ -24,7 +24,7 @@ type EmailConfig struct {
 	Aws     *Aws   //TODO:: make smarter and generic map[string]interface{}
 	Console *Console
 }
-
+ "QUEUE_NAME" ""
 type Aws struct {
 	QueueName    string
 	SenderEmail  string
