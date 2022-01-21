@@ -21,7 +21,6 @@ type MailSQSService struct {
 
 type Config struct {
 	QueueName    string
-	SenderEmail  string
 	DelaySeconds int32
 	Region       string
 	Url          string
@@ -53,7 +52,7 @@ func NewMailSQSService(cfg Properties) *MailSQSService {
 }
 
 func (p Properties) ValidAWSConfig() (Config, error) {
-	required := []string{"QueueName", "Sender", "DelaySeconds", "Region", "Url", "ClientId", "Secret"}
+	required := []string{"QueueName", "DelaySeconds", "Region", "Url", "ClientId", "Secret"}
 	var valid = true
 	errorMsg := "Missing required properties :"
 	for i, _ := range required {
@@ -66,12 +65,11 @@ func (p Properties) ValidAWSConfig() (Config, error) {
 	if valid {
 		return Config{
 			QueueName:    p[required[0]].(string),
-			SenderEmail:  p[required[1]].(string),
-			DelaySeconds: cast.ToInt32(p[required[2]]),
-			Region:       p[required[3]].(string),
-			Url:          p[required[4]].(string),
-			ClientId:     p[required[5]].(string),
-			Secret:       p[required[6]].(string),
+			DelaySeconds: cast.ToInt32(p[required[1]]),
+			Region:       p[required[2]].(string),
+			Url:          p[required[3]].(string),
+			ClientId:     p[required[4]].(string),
+			Secret:       p[required[5]].(string),
 		}, nil
 	} else {
 		return Config{}, eris.New(errorMsg)
