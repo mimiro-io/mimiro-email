@@ -10,7 +10,7 @@ func TestNewEmail(t *testing.T) {
 	var srv Email
 	g.Describe("test email interface", func() {
 		g.Before(func() {
-			consoleCfg := EmailConfig{
+			consoleCfg := Configuration{
 				Service: "Console",
 			}
 			srv, _ = NewEmail(consoleCfg)
@@ -33,7 +33,7 @@ func TestNewEmail(t *testing.T) {
 		})
 
 		g.It("test undefined service ", func() {
-			consoleCfg := EmailConfig{
+			consoleCfg := Configuration{
 				Service: "TEST",
 			}
 
@@ -42,7 +42,7 @@ func TestNewEmail(t *testing.T) {
 		})
 
 		g.It("test configuration  is ok ", func() {
-			consoleCfg := EmailConfig{
+			consoleCfg := Configuration{
 				Service: "AWS",
 				Properties: map[string]interface{}{
 					"QueueName":    "email",                                  // number => string
@@ -62,7 +62,7 @@ func TestNewEmail(t *testing.T) {
 		})
 
 		g.It("test configuration  is not ok ", func() {
-			consoleCfg := EmailConfig{
+			consoleCfg := Configuration{
 				Service: "AWS",
 				Properties: map[string]interface{}{
 					"QueueName":    "email",                                  // number => string
