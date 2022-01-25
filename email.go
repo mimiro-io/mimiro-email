@@ -1,4 +1,4 @@
-package main
+package email
 
 import (
 	"github.com/rotisserie/eris"
@@ -38,25 +38,4 @@ func NewEmail(cfg Configuration) (Email, error) {
 	default:
 		return nil, ErrUndefinedService
 	}
-}
-
-func main() {
-	consoleCfg := Configuration{
-		Service: "Console",
-		Sender:  "OpenFarm Dev <noreply@openfarm-dev.io>",
-	}
-	srv, _ := NewEmail(consoleCfg)
-	m := Mail{
-		To:       []string{"test1@test.com", "test2@test.com"},
-		Cc:       nil,
-		Bcc:      nil,
-		Subject:  "Subject",
-		BodyHtml: []byte("<h1>Heading</h1>"),
-		BodyText: []byte("Heading"),
-	}
-	err := srv.Send(m)
-	if err != nil {
-		return
-	}
-
 }

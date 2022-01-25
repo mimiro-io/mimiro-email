@@ -1,4 +1,4 @@
-package main
+package email
 
 import (
 	"go.uber.org/zap"
