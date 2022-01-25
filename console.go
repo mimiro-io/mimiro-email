@@ -1,4 +1,4 @@
-package email
+package main
 
 import (
 	"go.uber.org/zap"
@@ -9,12 +9,14 @@ type MailConsoleService struct {
 }
 
 func NewMailConsoleService() *MailConsoleService {
-	logger := zap.NewNop().Sugar()
+	logger := NewLogger()
+
 	return &MailConsoleService{logger: logger.Named("email")}
 }
 
-func (s *MailConsoleService) SendTemplate(email Mail) error {
-	s.logger.Debugf("mail sent to console with response %v", email)
+func (s *MailConsoleService) Send(email Mail) error {
+	s.logger.Infof("mail sent to %s with subject %s to console", email.To, email.Subject)
+	s.logger.Debug(string(email.BodyText))
 
 	return nil
 }

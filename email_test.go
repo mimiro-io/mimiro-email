@@ -1,4 +1,4 @@
-package email
+package main
 
 import (
 	"github.com/franela/goblin"
@@ -12,13 +12,13 @@ func TestNewEmail(t *testing.T) {
 		g.Before(func() {
 			consoleCfg := Configuration{
 				Service: "Console",
+				Sender:  "OpenFarm Dev <noreply@openfarm-dev.io>",
 			}
 			srv, _ = NewEmail(consoleCfg)
 		})
 
 		g.It("test console ", func() {
 			m := Mail{
-				Sender:   "OpenFarm Dev <noreply@openfarm-dev.io>",
 				To:       []string{"test1@test.com", "test2@test.com"},
 				Cc:       nil,
 				Bcc:      nil,
@@ -26,7 +26,7 @@ func TestNewEmail(t *testing.T) {
 				BodyHtml: []byte("<h1>Heading</h1>"),
 				BodyText: []byte("Heading"),
 			}
-			err := srv.SendTemplate(m)
+			err := srv.Send(m)
 
 			g.Assert(err).IsNil()
 
