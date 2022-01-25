@@ -1,4 +1,4 @@
-package email
+package main
 
 import (
 	"context"
@@ -29,7 +29,7 @@ type Config struct {
 }
 
 func NewMailSQSService(cfg Properties) *MailSQSService {
-	logger := zap.NewNop().Sugar()
+	logger := NewLogger()
 	config, err := cfg.ValidAWSConfig()
 	if err != nil {
 		logger.Warnf(err.Error())
@@ -76,7 +76,7 @@ func (p Properties) ValidAWSConfig() (Config, error) {
 	}
 }
 
-func (s *MailSQSService) SendTemplate(email Mail) error {
+func (s *MailSQSService) Send(email Mail) error {
 	// Get URL of queue
 	gQInput := &sqs.GetQueueUrlInput{
 		QueueName: &s.cfg.QueueName,
@@ -126,6 +126,8 @@ func (s *MailSQSService) SendTemplate(email Mail) error {
 	if err != nil {
 		return err
 	}
-	s.logger.Debugf("mail sent to sqs with response %v", sendMessageOutput)
+	s.logger.Infof("mail sent to %s with subject %s to SQS", email.To, email.Subject)
+	s.logger.Debugf("SQS response %v", sendMessageOutput)
+	s.logger.Debug(string(email.BodyText))
 	return nil
 }
