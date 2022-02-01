@@ -16,7 +16,7 @@ func NewMailConsoleService() *MailConsoleService {
 
 func (s *MailConsoleService) Send(email Mail) error {
 	s.logger.Infof("mail sent to %s with subject %s to console", email.To, email.Subject)
-	s.logger.Debug(string(email.BodyText))
+	s.logger.Infof("body : %s", string(email.BodyText))
 
 	return nil
 }
