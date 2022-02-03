@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
@@ -26,29 +27,47 @@ type Config struct {
 	Url          string
 	ClientId     string
 	Secret       string
+	Auth         string
 }
 
 func NewMailSQSService(cfg Properties) *MailSQSService {
 	logger := NewLogger()
-	config, err := cfg.ValidAWSConfig()
+	c, err := cfg.ValidAWSConfig()
 	if err != nil {
 		logger.Warnf(err.Error())
 		return nil
 	}
-	return &MailSQSService{
-		logger: logger.Named("email"),
-		cfg:    config,
-		client: sqs.NewFromConfig(aws.Config{
-			Region:      config.Region,
-			Credentials: credentials.NewStaticCredentialsProvider(config.ClientId, config.Secret, ""),
-			EndpointResolverWithOptions: aws.EndpointResolverWithOptionsFunc(func(service string, region string, Options ...interface{}) (aws.Endpoint, error) {
-				return aws.Endpoint{
-					URL:           config.Url,
-					SigningRegion: config.Region,
-				}, nil
+	if strings.ToUpper(c.Auth) == "CREDENTIALS" {
+		return &MailSQSService{
+			logger: logger.Named("email"),
+			cfg:    c,
+			client: sqs.NewFromConfig(aws.Config{
+				Region:      c.Region,
+				Credentials: credentials.NewStaticCredentialsProvider(c.ClientId, c.Secret, ""),
+				EndpointResolverWithOptions: aws.EndpointResolverWithOptionsFunc(func(service string, region string, Options ...interface{}) (aws.Endpoint, error) {
+					return aws.Endpoint{
+						URL:           c.Url,
+						SigningRegion: c.Region,
+					}, nil
+				}),
 			}),
-		}),
+		}
+	} else {
+		awsCfg, err := config.LoadDefaultConfig(context.TODO())
+		if err != nil {
+			panic("configuration error, " + err.Error())
+		}
+
+		client := sqs.NewFromConfig(awsCfg)
+
+		return &MailSQSService{
+			logger: logger.Named("email"),
+			cfg:    c,
+			client: client,
+		}
+
 	}
+
 }
 
 func (p Properties) ValidAWSConfig() (Config, error) {
