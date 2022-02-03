@@ -143,6 +143,7 @@ func (s *MailSQSService) Send(email Mail) error {
 
 	sendMessageOutput, err := s.client.SendMessage(context.Background(), input)
 	if err != nil {
+		s.logger.Infof("error send email to %s with subject %s to SQS wih error : %s", email.To, email.Subject, err.Error())
 		return err
 	}
 	s.logger.Infof("mail sent to %s with subject %s to SQS", email.To, email.Subject)
