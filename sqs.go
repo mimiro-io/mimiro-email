@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/rotisserie/eris"
@@ -23,11 +22,6 @@ type MailSQSService struct {
 type Config struct {
 	QueueName    string
 	DelaySeconds int32
-	Region       string
-	Url          string
-	ClientId     string
-	Secret       string
-	Auth         string
 }
 
 func NewMailSQSService(cfg Properties) *MailSQSService {
@@ -37,41 +31,24 @@ func NewMailSQSService(cfg Properties) *MailSQSService {
 		logger.Warnf(err.Error())
 		return nil
 	}
-	if strings.ToUpper(c.Auth) == "CREDENTIALS" {
-		return &MailSQSService{
-			logger: logger.Named("email"),
-			cfg:    c,
-			client: sqs.NewFromConfig(aws.Config{
-				Region:      c.Region,
-				Credentials: credentials.NewStaticCredentialsProvider(c.ClientId, c.Secret, ""),
-				EndpointResolverWithOptions: aws.EndpointResolverWithOptionsFunc(func(service string, region string, Options ...interface{}) (aws.Endpoint, error) {
-					return aws.Endpoint{
-						URL:           c.Url,
-						SigningRegion: c.Region,
-					}, nil
-				}),
-			}),
-		}
-	} else {
-		awsCfg, err := config.LoadDefaultConfig(context.TODO())
-		if err != nil {
-			panic("configuration error, " + err.Error())
-		}
 
-		client := sqs.NewFromConfig(awsCfg)
+	awsCfg, err := config.LoadDefaultConfig(context.Background())
+	if err != nil {
+		panic("configuration error, " + err.Error())
+	}
 
-		return &MailSQSService{
-			logger: logger.Named("email"),
-			cfg:    c,
-			client: client,
-		}
+	client := sqs.NewFromConfig(awsCfg)
 
+	return &MailSQSService{
+		logger: logger.Named("email"),
+		cfg:    c,
+		client: client,
 	}
 
 }
 
 func (p Properties) ValidAWSConfig() (Config, error) {
-	required := []string{"QueueName", "DelaySeconds", "Region", "Url", "ClientId", "Secret"}
+	required := []string{"QueueName", "DelaySeconds"}
 	var valid = true
 	errorMsg := "Missing required properties :"
 	for i, _ := range required {
@@ -85,10 +62,6 @@ func (p Properties) ValidAWSConfig() (Config, error) {
 		return Config{
 			QueueName:    p[required[0]].(string),
 			DelaySeconds: cast.ToInt32(p[required[1]]),
-			Region:       p[required[2]].(string),
-			Url:          p[required[3]].(string),
-			ClientId:     p[required[4]].(string),
-			Secret:       p[required[5]].(string),
 		}, nil
 	} else {
 		return Config{}, eris.New(errorMsg)
@@ -145,6 +118,6 @@ func (s *MailSQSService) Send(email Mail) error {
 	if err != nil {
 		return err
 	}
-	s.logger.Debugf("lgo sqs response %v", sendMessageOutput)
+	s.logger.Debugf("log sqs response %v", sendMessageOutput)
 	return nil
 }
