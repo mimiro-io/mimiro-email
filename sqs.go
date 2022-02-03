@@ -137,7 +137,7 @@ func (s *MailSQSService) Send(email Mail) error {
 				StringValue: aws.String(string(email.BodyText)),
 			},
 		},
-		MessageBody: nil,
+		MessageBody: aws.String(""),
 		QueueUrl:    queueUrl.QueueUrl,
 	}
 
