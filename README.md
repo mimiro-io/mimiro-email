@@ -103,7 +103,7 @@ Application using package "github.com/mimiro-io/mimiro-email"  needs to pass bui
           build-args: |
             GITHUB_PAT=${{ secrets.MIMIRO_BUILD_GITHUB_TOKEN }}
 
-Se ex below from mimiro-web-auth
+Se example below from application
 
 ```
 name: CI
