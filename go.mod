@@ -9,9 +9,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.29.12
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.38.3
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
-	github.com/rotisserie/eris v0.5.1
-	github.com/spf13/cast v1.4.1
-	go.uber.org/zap v1.20.0
+	github.com/rotisserie/eris v0.5.4
+	github.com/spf13/cast v1.7.1
+	go.uber.org/zap v1.27.0
 )
 
 require (
@@ -26,6 +26,5 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.17 // indirect
 	github.com/aws/smithy-go v1.22.3 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 )
